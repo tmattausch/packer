@@ -9,6 +9,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"strconv"
 	"strings"
 	"syscall"
 
@@ -23,8 +24,12 @@ type Communicator struct {
 }
 
 func (c *Communicator) Start(cmd *packer.RemoteCmd) error {
+	// need extra escapes for the command since we're wrapping it in quotes
+	log.Printf("cmd is %s", cmd.Command)
+	cmd.Command = strconv.Quote(cmd.Command)
+	log.Printf("cmd is %s", cmd.Command)
 	command, err := c.CmdWrapper(
-		fmt.Sprintf("chroot %s /bin/sh -c \"%s\"", c.Chroot, cmd.Command))
+		fmt.Sprintf("chroot %s /bin/sh -c %s", c.Chroot, cmd.Command))
 	if err != nil {
 		return err
 	}
